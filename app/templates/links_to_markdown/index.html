@@ -1,8 +1,39 @@
 {% extends "./base.html" %}
+
 {% block content %}
-<form action="/" method="post">
+<div class="mdc-layout-grid__cell--span-12">
+    <h1 class="mdc-typography--headline4">Links to Markdown Converter</h1>
+</div>
+
+<form method="post" class="mdc-layout-grid__cell--span-12" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit">
+    {% if form.non_field_errors %}
+        <div class="error">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% for field in form %}
+        <div class="mdc-layout-grid__cell--span-12 form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+                <div class="error">
+                    {% for error in field.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <div class="mdc-layout-grid__cell--span-12">
+        <button type="submit" class="mdc-button mdc-button--raised">
+            <span class="mdc-button__label">Convert</span>
+        </button>
+    </div>
 </form>
 {% endblock %}

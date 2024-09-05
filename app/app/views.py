@@ -29,10 +29,16 @@ class LinksToMarkdownView(View):
             _links = form.cleaned_data['links']
             links = _links.splitlines()
             for link in links:
-                with urllib.request.urlopen(link) as f:
-                    m = re.search('<title>(.+?)</title>', f.read().decode('utf-8'))
-                    if m is not None:
-                        titles.append("* [{}]({})".format(m.group(1), link))
+                try:
+                    with urllib.request.urlopen(link) as f:
+                        m = re.search('<title>(.+?)</title>', f.read().decode('utf-8', errors='ignore'))
+                        if m is not None:
+                            titles.append("* [{}]({})".format(m.group(1), link))
+                        else:
+                            titles.append(f"* [{link}]({link})")
+                except (urllib.error.URLError, ValueError):
+                    titles.append(f"* [Error fetching title for: {link}]({link})")
+                    logging.error(f'Error fetching link: {link}')
             form = self.form_class(initial=self.initial)
             self.initial['markdown'] = '\n'.join(titles)
             self.initial['links'] = _links
