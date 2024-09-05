@@ -1,11 +1,11 @@
 Convert url to markdown url (auto fetching the title)
 
 ```
-docker-compose build
+docker-compose up -d --build
 ```
 
 ```
-docker-compose up -d
+docker compose exec celery python manage.py migrate django_celery_results
 ```
 
-Browse http://localhost:8000
+Browse http://localhost:
