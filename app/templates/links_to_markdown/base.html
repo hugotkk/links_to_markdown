@@ -27,35 +27,56 @@
             border: 0;
         }
         textarea.mdc-text-field__input {
-            min-height: 150px;
+            min-height: 200px;
             border: 2px solid #4a4a4a;
             border-radius: 4px;
-            padding: 12px;
+            padding: 8px;
             width: 100%;
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.4;
             resize: vertical;
+            margin-bottom: 12px;
         }
         textarea.mdc-text-field__input:focus {
             outline: none;
             border-color: #1976d2;
-            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.3);
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
         }
         #markdown-output {
-            min-height: 300px;
+            min-height: 200px;
         }
         .mdc-layout-grid__cell--span-12 {
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
         .mdc-button {
-            margin-right: 16px;
-            margin-bottom: 16px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .mdc-typography--headline4 {
+            margin-bottom: 12px;
+        }
+        .mdc-typography--body1 {
+            margin-bottom: 8px;
+        }
+        .mdc-typography--subtitle1 {
+            margin-bottom: 4px;
+        }
+        #links-input-help {
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        #conversion-progress {
+            margin-top: 8px;
+            margin-bottom: 8px;
         }
         @media (max-width: 600px) {
             textarea.mdc-text-field__input {
                 font-size: 14px;
+            }
+            .mdc-layout-grid__cell--span-12 {
+                margin-bottom: 12px;
             }
         }
     </style>

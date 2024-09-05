@@ -1,11 +1,18 @@
 FROM python:latest
 
+WORKDIR /app
+
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-WORKDIR /app
-
 COPY app .
 
-CMD ["/usr/local/bin/python", "manage.py", "runserver", "0:8000"]
+# Install Gunicorn
+RUN pip install gunicorn
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Run Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.wsgi:application"]
