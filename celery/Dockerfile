@@ -10,4 +10,4 @@ COPY app .
 
 RUN pip install celery
 
-CMD ["celery", "-A", "app.tasks", "worker", "--beat", "--loglevel=info"]
+CMD ["celery", "-A", "app", "worker", "-l", "info"]

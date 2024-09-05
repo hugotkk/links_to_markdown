@@ -102,7 +102,7 @@
                             console.error('Error copying text: ', err);
                         });
                     };
-                } else if (data.status === 'processing') {
+                } else if (data.status === 'pending' || data.status == 'processing') {
                     progressBar.style.display = 'block';
                     markdownOutput.value = data.output;
                     progressBar.setAttribute('aria-valuenow', data.progress);

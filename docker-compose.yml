@@ -12,8 +12,13 @@ services:
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
       - DJANGO_SETTINGS_MODULE=app.settings
+      - DB_HOST=db
+      - DB_NAME=appdb
+      - DB_USER=appuser
+      - DB_PASSWORD=apppassword
     depends_on:
       - rabbitmq
+      - db
 
   nginx:
     image: nginx:latest
@@ -31,9 +36,15 @@ services:
       dockerfile: celery/Dockerfile
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - DJANGO_SETTINGS_MODULE=app.settings
+      - DB_HOST=db
+      - DB_NAME=appdb
+      - DB_USER=appuser
+      - DB_PASSWORD=apppassword
     depends_on:
       - app
       - rabbitmq
+      - db
 
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -41,5 +52,16 @@ services:
       - 5672:5672
       - 15672:15672
 
+  db:
+    image: mariadb:10.5
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=appdb
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=apppassword
+      - MYSQL_ROOT_PASSWORD=rootpassword
+
 volumes:
   static_volume:
+  mariadb_data:
