@@ -66,3 +66,6 @@ def get_conversion_status(request):
             'links': links
         }
     return JsonResponse(response)
+
+def health_check(request):
+    return JsonResponse({'status': 'healthy'}, status=200)

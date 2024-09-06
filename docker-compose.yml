@@ -17,18 +17,39 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
-      - rabbitmq
-      - db
+      rabbitmq:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      init-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   nginx:
     image: nginx:latest
     ports:
       - 80:80
+      - 443:443
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - static_volume:/app/build
+      - ssl_certs:/etc/nginx/ssl
     depends_on:
-      - app
+      app:
+        condition: service_healthy
+      init-ssl:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:443/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   celery:
     build:
@@ -42,9 +63,20 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
-      - app
-      - rabbitmq
-      - db
+      app:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      init-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app inspect ping -d celery@$$HOSTNAME"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -54,6 +86,12 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   db:
     image: mariadb:10.5
@@ -64,7 +102,43 @@ services:
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  init-ssl:
+    image: alpine:latest
+    command: >
+      sh -c "
+      if [ ! -f /ssl/nginx.crt ] || [ ! -f /ssl/nginx.key ]; then
+        apk add --no-cache openssl &&
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /ssl/nginx.key -out /ssl/nginx.crt -subj '/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost'
+      else
+        echo 'SSL certificates already exist. Skipping generation.'
+      fi
+      "
+    volumes:
+      - ssl_certs:/ssl
+
+  init-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py migrate
+    environment:
+      - DJANGO_SETTINGS_MODULE=app.settings
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   static_volume:
   mariadb_data:
+  ssl_certs:
