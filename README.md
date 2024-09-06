@@ -15,6 +15,7 @@ Ensure you have the following installed:
 2. To start the services using Docker, run the following command:
 
 ```bash
+cp .env.sample .env
 docker-compose up -d --build
 ```
 
