@@ -10,12 +10,12 @@ services:
       - ./app:/app
       - static_volume:/app/build
     environment:
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
       - DJANGO_SETTINGS_MODULE=app.settings
       - DB_HOST=db
-      - DB_NAME=appdb
-      - DB_USER=appuser
-      - DB_PASSWORD=apppassword
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       - rabbitmq
       - db
@@ -35,12 +35,12 @@ services:
       context: .
       dockerfile: celery/Dockerfile
     environment:
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
       - DJANGO_SETTINGS_MODULE=app.settings
       - DB_HOST=db
-      - DB_NAME=appdb
-      - DB_USER=appuser
-      - DB_PASSWORD=apppassword
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       - app
       - rabbitmq
@@ -51,16 +51,19 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
 
   db:
     image: mariadb:10.5
     volumes:
       - mariadb_data:/var/lib/mysql
     environment:
-      - MYSQL_DATABASE=appdb
-      - MYSQL_USER=appuser
-      - MYSQL_PASSWORD=apppassword
-      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
 
 volumes:
   static_volume:
